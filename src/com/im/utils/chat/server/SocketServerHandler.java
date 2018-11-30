@@ -195,7 +195,6 @@ public class SocketServerHandler extends CustomHeartbeatHandler {
 					chatfriend.setIsonline("1");
 					ssh.iChatfriendService.updateChatfriend(chatfriend);
 					
-
 					/*String userid=NettyChannelMap.getkey(channelHandlerContext);
 					String username=map.get("UN");
 					if(userid.length()>0){ 
