@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.im.dao.chatgroup.IChatgroupMapper"> 
+	<select id="selectchatgroupById" parameterType="String" resultType="Chatgroup">
+		SELECT * FROM chatgroup WHERE ID=#{id}
+	</select>
+
+	<delete id="deletechatgroup" parameterType="String"> 
+		DELETE FROM chatgroup WHERE ID=#{id}
+	</delete>
+
+	<select id="selectchatgroupByParam" parameterType="java.util.Map" resultType="Chatgroup">
+		SELECT *
+		FROM chatgroup
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="id != null"> AND ID =#{id} </if>
+			<if test="groupid != null"> AND GROUPID =#{groupid} </if>
+			<if test="groupname != null"> AND GROUPNAME =#{groupname} </if>
+			<if test="adduserid != null"> AND ADDUSERID =#{adduserid} </if>
+			<if test="groupimage != null"> AND GROUPIMAGE =#{groupimage} </if>
+			<if test="groupdetail != null"> AND GROUPDETAIL =#{groupdetail} </if>
+			<if test="addtimeFrom != null"> AND unix_timestamp(ADDTIME) &gt;=unix_timestamp(#{addtimeFrom}) </if>
+			<if test="addtimeTo != null"> AND unix_timestamp(ADDTIME) &lt;=unix_timestamp(#{addtimeTo}) </if>
+			<if test="addtime != null"> AND ADDTIME =#{addtime} </if>
+			<if test="flag != null"> AND FLAG =#{flag} </if>
+		</trim>  
+			<if test="orderBy!= null"> ORDER BY   #{orderBy} </if>
+		LIMIT #{fromPage},#{toPage} 
+	</select>
+
+	<select id="selectCountchatgroupByParam" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(id) 
+		FROM chatgroup 
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="id != null"> AND ID =#{id} </if>
+			<if test="groupid != null"> AND GROUPID =#{groupid} </if>
+			<if test="groupname != null"> AND GROUPNAME =#{groupname} </if>
+			<if test="adduserid != null"> AND ADDUSERID =#{adduserid} </if>
+			<if test="groupimage != null"> AND GROUPIMAGE =#{groupimage} </if>
+			<if test="groupdetail != null"> AND GROUPDETAIL =#{groupdetail} </if>
+			<if test="addtimeFrom != null"> AND unix_timestamp(ADDTIME) &gt;=unix_timestamp(#{addtimeFrom}) </if>
+			<if test="addtimeTo != null"> AND unix_timestamp(ADDTIME) &lt;=unix_timestamp(#{addtimeTo}) </if>
+			<if test="addtime != null"> AND ADDTIME =#{addtime} </if>
+			<if test="flag != null"> AND FLAG =#{flag} </if>
+		</trim>  
+	</select>
+
+	<update id="updatechatgroup" parameterType="Chatgroup">
+		UPDATE chatgroup 
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="id != null">ID=#{id}, </if>
+			<if test="groupid != null">GROUPID=#{groupid}, </if>
+			<if test="groupname != null">GROUPNAME=#{groupname}, </if>
+			<if test="adduserid != null">ADDUSERID=#{adduserid}, </if>
+			<if test="groupimage != null">GROUPIMAGE=#{groupimage}, </if>
+			<if test="groupdetail != null">GROUPDETAIL=#{groupdetail}, </if>
+			<if test="addtime != null">ADDTIME=#{addtime}, </if>
+			<if test="flag != null">FLAG=#{flag}, </if>
+		</trim>
+		WHERE ID=#{id}
+	</update>
+
+	<insert id="addchatgroup" parameterType="Chatgroup" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO chatgroup 
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="groupid != null">GROUPID, </if>
+			<if test="groupname != null">GROUPNAME, </if>
+			<if test="adduserid != null">ADDUSERID, </if>
+			<if test="groupimage != null">GROUPIMAGE, </if>
+			<if test="groupdetail != null">GROUPDETAIL, </if>
+			<if test="addtime != null">ADDTIME, </if>
+			<if test="flag != null">FLAG, </if>
+		</trim>
+		<trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+			<if test="groupid != null">#{groupid}, </if>
+			<if test="groupname != null">#{groupname}, </if>
+			<if test="adduserid != null">#{adduserid}, </if>
+			<if test="groupimage != null">#{groupimage}, </if>
+			<if test="groupdetail != null">#{groupdetail}, </if>
+			<if test="addtime != null">#{addtime}, </if>
+			<if test="flag != null">#{flag}, </if>
+		</trim>
+	</insert>
+
+	<insert id="muladdchatgroup" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+		<foreach collection="list" item="item" index="index" open=""
+			close="" separator=";">
+			INSERT INTO chatgroup 
+			<trim prefix="(" suffix=")" suffixOverrides="," >
+				<if test="item.id != null">ID, </if>
+				<if test="item.groupid != null">GROUPID, </if>
+				<if test="item.groupname != null">GROUPNAME, </if>
+				<if test="item.adduserid != null">ADDUSERID, </if>
+				<if test="item.groupimage != null">GROUPIMAGE, </if>
+				<if test="item.groupdetail != null">GROUPDETAIL, </if>
+				<if test="item.addtime != null">ADDTIME, </if>
+				<if test="item.flag != null">FLAG, </if>
+			</trim>
+			<trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+				<if test="item.id != null">#{item.id}, </if>
+				<if test="item.groupid != null">#{item.groupid}, </if>
+				<if test="item.groupname != null">#{item.groupname}, </if>
+				<if test="item.adduserid != null">#{item.adduserid}, </if>
+				<if test="item.groupimage != null">#{item.groupimage}, </if>
+				<if test="item.groupdetail != null">#{item.groupdetail}, </if>
+				<if test="item.addtime != null">#{item.addtime}, </if>
+				<if test="item.flag != null">#{item.flag}, </if>
+			</trim>
+		</foreach>
+	</insert>
+</mapper>

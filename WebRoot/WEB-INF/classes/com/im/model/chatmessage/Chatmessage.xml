@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.im.dao.chatmessage.IChatmessageMapper"> 
+	<select id="selectchatmessageById" parameterType="String" resultType="Chatmessage">
+		SELECT * FROM chatmessage WHERE ID=#{id}
+	</select>
+
+	<delete id="deletechatmessage" parameterType="String"> 
+		DELETE FROM chatmessage WHERE ID=#{id}
+	</delete>
+
+	<select id="selectchatmessageByParam" parameterType="java.util.Map" resultType="Chatmessage">
+		SELECT *
+		FROM chatmessage
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="id != null"> AND ID =#{id} </if>
+			<if test="userid != null"> AND USERID =#{userid} </if>
+			<if test="friendid != null"> AND FRIENDID =#{friendid} </if>
+			<if test="addtimeFrom != null"> AND unix_timestamp(ADDTIME) &gt;=unix_timestamp(#{addtimeFrom}) </if>
+			<if test="addtimeTo != null"> AND unix_timestamp(ADDTIME) &lt;=unix_timestamp(#{addtimeTo}) </if>
+			<if test="addtime != null"> AND ADDTIME =#{addtime} </if>
+			<if test="chattype != null"> AND CHATTYPE =#{chattype} </if>
+			<if test="contenttype != null"> AND CONTENTTYPE =#{contenttype} </if>
+			<if test="content != null"> AND CONTENT =#{content} </if>
+			<if test="readstatus != null"> AND READSTATUS =#{readstatus} </if>
+			<if test="sendstatus != null"> AND SENDSTATUS =#{sendstatus} </if>
+			<if test="isgroup != null"> AND ISGROUP =#{isgroup} </if>
+			<if test="flag != null"> AND FLAG =#{flag} </if>
+		</trim>  
+			<if test="orderBy!= null"> ORDER BY   #{orderBy} </if>
+		LIMIT #{fromPage},#{toPage} 
+	</select>
+
+	<select id="selectCountchatmessageByParam" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(id) 
+		FROM chatmessage 
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="id != null"> AND ID =#{id} </if>
+			<if test="userid != null"> AND USERID =#{userid} </if>
+			<if test="friendid != null"> AND FRIENDID =#{friendid} </if>
+			<if test="addtimeFrom != null"> AND unix_timestamp(ADDTIME) &gt;=unix_timestamp(#{addtimeFrom}) </if>
+			<if test="addtimeTo != null"> AND unix_timestamp(ADDTIME) &lt;=unix_timestamp(#{addtimeTo}) </if>
+			<if test="addtime != null"> AND ADDTIME =#{addtime} </if>
+			<if test="chattype != null"> AND CHATTYPE =#{chattype} </if>
+			<if test="contenttype != null"> AND CONTENTTYPE =#{contenttype} </if>
+			<if test="content != null"> AND CONTENT =#{content} </if>
+			<if test="readstatus != null"> AND READSTATUS =#{readstatus} </if>
+			<if test="sendstatus != null"> AND SENDSTATUS =#{sendstatus} </if>
+			<if test="isgroup != null"> AND ISGROUP =#{isgroup} </if>
+			<if test="flag != null"> AND FLAG =#{flag} </if>
+		</trim>  
+	</select>
+
+	<update id="updatechatmessage" parameterType="Chatmessage">
+		UPDATE chatmessage 
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="id != null">ID=#{id}, </if>
+			<if test="userid != null">USERID=#{userid}, </if>
+			<if test="friendid != null">FRIENDID=#{friendid}, </if>
+			<if test="addtime != null">ADDTIME=#{addtime}, </if>
+			<if test="chattype != null">CHATTYPE=#{chattype}, </if>
+			<if test="contenttype != null">CONTENTTYPE=#{contenttype}, </if>
+			<if test="content != null">CONTENT=#{content}, </if>
+			<if test="readstatus != null">READSTATUS=#{readstatus}, </if>
+			<if test="sendstatus != null">SENDSTATUS=#{sendstatus}, </if>
+			<if test="isgroup != null">ISGROUP=#{isgroup}, </if>
+			<if test="flag != null">FLAG=#{flag}, </if>
+		</trim>
+		WHERE ID=#{id}
+	</update>
+
+	<insert id="addchatmessage" parameterType="Chatmessage" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO chatmessage 
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="userid != null">USERID, </if>
+			<if test="friendid != null">FRIENDID, </if>
+			<if test="addtime != null">ADDTIME, </if>
+			<if test="chattype != null">CHATTYPE, </if>
+			<if test="contenttype != null">CONTENTTYPE, </if>
+			<if test="content != null">CONTENT, </if>
+			<if test="readstatus != null">READSTATUS, </if>
+			<if test="sendstatus != null">SENDSTATUS, </if>
+			<if test="isgroup != null">ISGROUP, </if>
+			<if test="flag != null">FLAG, </if>
+		</trim>
+		<trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+			<if test="userid != null">#{userid}, </if>
+			<if test="friendid != null">#{friendid}, </if>
+			<if test="addtime != null">#{addtime}, </if>
+			<if test="chattype != null">#{chattype}, </if>
+			<if test="contenttype != null">#{contenttype}, </if>
+			<if test="content != null">#{content}, </if>
+			<if test="readstatus != null">#{readstatus}, </if>
+			<if test="sendstatus != null">#{sendstatus}, </if>
+			<if test="isgroup != null">#{isgroup}, </if>
+			<if test="flag != null">#{flag}, </if>
+		</trim>
+	</insert>
+
+	<insert id="muladdchatmessage" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+		<foreach collection="list" item="item" index="index" open=""
+			close="" separator=";">
+			INSERT INTO chatmessage 
+			<trim prefix="(" suffix=")" suffixOverrides="," >
+				<if test="item.id != null">ID, </if>
+				<if test="item.userid != null">USERID, </if>
+				<if test="item.friendid != null">FRIENDID, </if>
+				<if test="item.addtime != null">ADDTIME, </if>
+				<if test="item.chattype != null">CHATTYPE, </if>
+				<if test="item.contenttype != null">CONTENTTYPE, </if>
+				<if test="item.content != null">CONTENT, </if>
+				<if test="item.readstatus != null">READSTATUS, </if>
+				<if test="item.sendstatus != null">SENDSTATUS, </if>
+				<if test="item.isgroup != null">ISGROUP, </if>
+				<if test="item.flag != null">FLAG, </if>
+			</trim>
+			<trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+				<if test="item.id != null">#{item.id}, </if>
+				<if test="item.userid != null">#{item.userid}, </if>
+				<if test="item.friendid != null">#{item.friendid}, </if>
+				<if test="item.addtime != null">#{item.addtime}, </if>
+				<if test="item.chattype != null">#{item.chattype}, </if>
+				<if test="item.contenttype != null">#{item.contenttype}, </if>
+				<if test="item.content != null">#{item.content}, </if>
+				<if test="item.readstatus != null">#{item.readstatus}, </if>
+				<if test="item.sendstatus != null">#{item.sendstatus}, </if>
+				<if test="item.isgroup != null">#{item.isgroup}, </if>
+				<if test="item.flag != null">#{item.flag}, </if>
+			</trim>
+		</foreach>
+	</insert>
+</mapper>

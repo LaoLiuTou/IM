@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.im.dao.chataddress.IChataddressMapper"> 
+	<select id="selectchataddressById" parameterType="String" resultType="Chataddress">
+		SELECT * FROM chataddress WHERE USERID=#{userid}
+	</select>
+
+	<delete id="deletechataddress" parameterType="String"> 
+		DELETE FROM chataddress WHERE ID=#{id}
+	</delete>
+
+	<select id="selectchataddressByParam" parameterType="java.util.Map" resultType="Chataddress">
+		SELECT *
+		FROM chataddress
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="id != null"> AND ID =#{id} </if>
+			<if test="userid != null"> AND USERID =#{userid} </if>
+			<if test="address != null"> AND ADDRESS =#{address} </if>
+			<if test="status != null"> AND STATUS =#{status} </if>
+			<if test="addtimeFrom != null"> AND unix_timestamp(ADDTIME) &gt;=unix_timestamp(#{addtimeFrom}) </if>
+			<if test="addtimeTo != null"> AND unix_timestamp(ADDTIME) &lt;=unix_timestamp(#{addtimeTo}) </if>
+			<if test="addtime != null"> AND ADDTIME =#{addtime} </if>
+		</trim>  
+			<if test="orderBy!= null"> ORDER BY   #{orderBy} </if>
+		LIMIT #{fromPage},#{toPage} 
+	</select>
+
+	<select id="selectCountchataddressByParam" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(id) 
+		FROM chataddress 
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="id != null"> AND ID =#{id} </if>
+			<if test="userid != null"> AND USERID =#{userid} </if>
+			<if test="address != null"> AND ADDRESS =#{address} </if>
+			<if test="status != null"> AND STATUS =#{status} </if>
+			<if test="addtimeFrom != null"> AND unix_timestamp(ADDTIME) &gt;=unix_timestamp(#{addtimeFrom}) </if>
+			<if test="addtimeTo != null"> AND unix_timestamp(ADDTIME) &lt;=unix_timestamp(#{addtimeTo}) </if>
+			<if test="addtime != null"> AND ADDTIME =#{addtime} </if>
+		</trim>  
+	</select>
+
+	<update id="updatechataddress" parameterType="Chataddress">
+		UPDATE chataddress 
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="id != null">ID=#{id}, </if>
+			<if test="userid != null">USERID=#{userid}, </if>
+			<if test="address != null">ADDRESS=#{address}, </if>
+			<if test="status != null">STATUS=#{status}, </if>
+			<if test="addtime != null">ADDTIME=#{addtime}, </if>
+		</trim>
+		WHERE ID=#{id}
+	</update>
+	<update id="updateChatByUserid" parameterType="Chataddress">
+		UPDATE chataddress 
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="id != null">ID=#{id}, </if>
+			<if test="userid != null">USERID=#{userid}, </if>
+			<if test="address != null">ADDRESS=#{address}, </if>
+			<if test="status != null">STATUS=#{status}, </if>
+			<if test="addtime != null">ADDTIME=#{addtime}, </if>
+		</trim>
+		WHERE USERID=#{userid}
+	</update>
+
+	<insert id="addchataddress" parameterType="Chataddress" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO chataddress 
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="userid != null">USERID, </if>
+			<if test="address != null">ADDRESS, </if>
+			<if test="status != null">STATUS, </if>
+			<if test="addtime != null">ADDTIME, </if>
+		</trim>
+		<trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+			<if test="userid != null">#{userid}, </if>
+			<if test="address != null">#{address}, </if>
+			<if test="status != null">#{status}, </if>
+			<if test="addtime != null">#{addtime}, </if>
+		</trim>
+	</insert>
+
+	<insert id="muladdchataddress" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+		<foreach collection="list" item="item" index="index" open=""
+			close="" separator=";">
+			INSERT INTO chataddress 
+			<trim prefix="(" suffix=")" suffixOverrides="," >
+				<if test="item.id != null">ID, </if>
+				<if test="item.userid != null">USERID, </if>
+				<if test="item.address != null">ADDRESS, </if>
+				<if test="item.status != null">STATUS, </if>
+				<if test="item.addtime != null">ADDTIME, </if>
+			</trim>
+			<trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+				<if test="item.id != null">#{item.id}, </if>
+				<if test="item.userid != null">#{item.userid}, </if>
+				<if test="item.address != null">#{item.address}, </if>
+				<if test="item.status != null">#{item.status}, </if>
+				<if test="item.addtime != null">#{item.addtime}, </if>
+			</trim>
+		</foreach>
+	</insert>
+</mapper>

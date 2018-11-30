@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.im.dao.chatfriend.IChatfriendMapper"> 
+	<select id="selectchatfriendById" parameterType="String" resultType="Chatfriend">
+		SELECT * FROM chatfriend WHERE USERID=#{userid}
+	</select>
+
+	<delete id="deletechatfriend" parameterType="String"> 
+		DELETE FROM chatfriend WHERE USERID=#{userid}
+	</delete>
+
+	<select id="selectchatfriendByParam" parameterType="java.util.Map" resultType="Chatfriend">
+		SELECT *
+		FROM chatfriend
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="id != null"> AND ID =#{id} </if>
+			<if test="userid != null"> AND USERID =#{userid} </if>
+			<if test="friendid != null"> AND FRIENDID =#{friendid} </if>
+			<if test="isgroup != null"> AND ISGROUP =#{isgroup} </if>
+			<if test="isonline != null"> AND ISONLINE =#{isonline} </if>
+		</trim>  
+			<if test="orderBy!= null"> ORDER BY   #{orderBy} </if>
+		LIMIT #{fromPage},#{toPage} 
+	</select>
+
+	<select id="selectCountchatfriendByParam" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(id) 
+		FROM chatfriend 
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="id != null"> AND ID =#{id} </if>
+			<if test="userid != null"> AND USERID =#{userid} </if>
+			<if test="friendid != null"> AND FRIENDID =#{friendid} </if>
+			<if test="isgroup != null"> AND ISGROUP =#{isgroup} </if>
+			<if test="isonline != null"> AND ISONLINE =#{isonline} </if>
+		</trim>  
+	</select>
+
+	<update id="updatechatfriend" parameterType="Chatfriend">
+		UPDATE chatfriend 
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="id != null">ID=#{id}, </if>
+			<if test="userid != null">USERID=#{userid}, </if>
+			<if test="friendid != null">FRIENDID=#{friendid}, </if>
+			<if test="isgroup != null">ISGROUP=#{isgroup}, </if>
+			<if test="isonline != null">ISONLINE=#{isonline}, </if>
+		</trim>
+		WHERE FRIENDID=#{friendid}
+	</update>
+
+	<insert id="addchatfriend" parameterType="Chatfriend" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO chatfriend 
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="userid != null">USERID, </if>
+			<if test="friendid != null">FRIENDID, </if>
+			<if test="isgroup != null">ISGROUP, </if>
+			<if test="isonline != null">ISONLINE, </if>
+		</trim>
+		<trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+			<if test="userid != null">#{userid}, </if>
+			<if test="friendid != null">#{friendid}, </if>
+			<if test="isgroup != null">#{isgroup}, </if>
+			<if test="isonline != null">#{isonline}, </if>
+		</trim>
+	</insert>
+
+	<insert id="muladdchatfriend" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+		<foreach collection="list" item="item" index="index" open=""
+			close="" separator=";">
+			INSERT INTO chatfriend 
+			<trim prefix="(" suffix=")" suffixOverrides="," >
+				<if test="item.id != null">ID, </if>
+				<if test="item.userid != null">USERID, </if>
+				<if test="item.friendid != null">FRIENDID, </if>
+				<if test="item.isgroup != null">ISGROUP, </if>
+				<if test="item.isonline != null">ISONLINE, </if>
+			</trim>
+			<trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+				<if test="item.id != null">#{item.id}, </if>
+				<if test="item.userid != null">#{item.userid}, </if>
+				<if test="item.friendid != null">#{item.friendid}, </if>
+				<if test="item.isgroup != null">#{item.isgroup}, </if>
+				<if test="item.isonline != null">#{item.isonline}, </if>
+			</trim>
+		</foreach>
+	</insert>
+</mapper>
