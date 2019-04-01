@@ -2,6 +2,8 @@ package com.im.utils.chat.server;
 
 
 
+import java.nio.charset.Charset;
+
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -25,8 +27,8 @@ public class SocketServerInitializer extends
 		Logger logger = Logger.getLogger("NettyChatLogger");
 		 ChannelPipeline pipeline = ch.pipeline(); 
         pipeline.addLast("framer", new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
-        pipeline.addLast("decoder", new StringDecoder());
-        pipeline.addLast("encoder", new StringEncoder());
+        pipeline.addLast("decoder", new StringDecoder(Charset.forName("GBK")));
+        pipeline.addLast("encoder", new StringEncoder(Charset.forName("GBK")));
         pipeline.addLast("handler", new SocketServerHandler());
         pipeline.addLast(new IdleStateHandler(10, 0, 0));
         pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, -4, 0)); 

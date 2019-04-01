@@ -26,8 +26,8 @@ import com.im.utils.chat.ServerManager;
  */
 @Component 
 public abstract class CustomHeartbeatHandler extends SimpleChannelInboundHandler<Object> {
-	
-	private static CustomHeartbeatHandler chh;
+	 @Autowired  
+	protected  static CustomHeartbeatHandler chh;
 	@Autowired
 	private IChatuserService iChatuserService;
 	@Autowired
@@ -39,7 +39,7 @@ public abstract class CustomHeartbeatHandler extends SimpleChannelInboundHandler
     public static final String PONG_MSG = "{\"T\":\"0\"}";
     public static final String CUSTOM_MSG = "3";
     protected String name;
-    private int heartbeatCount = 0;
+    //private int heartbeatCount = 0;
 
     public CustomHeartbeatHandler(String name) {
         this.name = name;
@@ -54,7 +54,7 @@ public abstract class CustomHeartbeatHandler extends SimpleChannelInboundHandler
     	if (string.equals(PING_MSG)) {
             sendPongMsg(context);
         } else if (string.equals(PONG_MSG)){
-            System.out.println(name + " get pong msg from " + context.channel().remoteAddress());
+            //System.out.println(name + " get pong msg from " + context.channel().remoteAddress());
         }
         else {
             handleData(context, string);
@@ -69,8 +69,8 @@ public abstract class CustomHeartbeatHandler extends SimpleChannelInboundHandler
         buf.retain();
         context.writeAndFlush(buf);*/
         context.writeAndFlush(PING_MSG);
-        heartbeatCount++;
-        System.out.println(name + " sent ping msg to " + context.channel().remoteAddress() + ", count: " + heartbeatCount);
+        //heartbeatCount++;
+        //System.out.println(name + " sent ping msg to " + context.channel().remoteAddress() + ", count: " + heartbeatCount);
     }
 
     private void sendPongMsg(ChannelHandlerContext context) {
@@ -79,8 +79,8 @@ public abstract class CustomHeartbeatHandler extends SimpleChannelInboundHandler
         buf.writeByte(PONG_MSG);
         context.channel().writeAndFlush(buf);*/
         context.channel().writeAndFlush(PONG_MSG);
-        heartbeatCount++;
-        System.out.println(name + " sent pong msg to " + context.channel().remoteAddress() + ", count: " + heartbeatCount);
+        //heartbeatCount++;
+        //System.out.println(name + " sent pong msg to " + context.channel().remoteAddress() + ", count: " + heartbeatCount);
     }
 
    //protected abstract void handleData(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf);
@@ -114,61 +114,9 @@ public abstract class CustomHeartbeatHandler extends SimpleChannelInboundHandler
      
     }
 
-    @SuppressWarnings("rawtypes")
+    
 	@Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        
-        String userid=NettyChannelMap.getkey(ctx);
-        for (Map.Entry entry:NettyChannelMap.map.entrySet()){
-            if (entry.getValue()==ctx){
-            	//database
-                Chatuser chatuser= new Chatuser(); 
-                chatuser.setUserid(entry.getKey().toString());
-                chatuser.setIsonline("1");
-                chatuser.setDetail("");
-                //chatuser.setFlag("0");
-                chh.iChatuserService.updateChatuser(chatuser);
-                
-                Chatfriend chatfriend = new Chatfriend();
-                chatfriend.setFriendid(entry.getKey().toString());
-                chatfriend.setIsonline("1");
-                chh.iChatfriendService.updateChatfriend(chatfriend);
-            }
-            /*else{//通知其他用户自己下线
-            	Chatuser chatuser= new Chatuser(); 
-                chatuser=iChatuserService.selectchatuserById(userid);
-                if(chatuser!=null){
-                	ChannelHandlerContext temp = (ChannelHandlerContext) entry.getValue();
-                	Map<String,String> paramMap=new HashMap<String,String>();
-            		paramMap.put("T", "5");
-            		paramMap.put("FI", userid);
-            		paramMap.put("FN", chatuser.getUsername());
-            		ObjectMapper mapper = new ObjectMapper();
-        			String json = "";
-        			json = mapper.writeValueAsString(paramMap);
-                    String content = json;
-                    ByteBuf buf = temp.alloc().buffer(5 + content.getBytes().length);
-                    buf.writeInt(5 + content.getBytes().length);
-                    buf.writeByte(CustomHeartbeatHandler.CUSTOM_MSG);
-                    buf.writeBytes(content.getBytes());
-                    temp.writeAndFlush(buf);
-                    temp.writeAndFlush(content);
-                	 
-                }
-            	
-            }*/
-        }
-        //移除
-        NettyChannelMap.remove(ctx);
-        if(ServerManager.cacheType.equals("redis")){
-        	RedisUtil.delOject(userid);
-        }
-        else if(ServerManager.cacheType.equals("database")){
-        	Chataddress ca = new Chataddress();
-        	ca.setUserid(userid);
-        	ca.setStatus("1");
-        	chh.iChataddressService.updateChatByUserid(ca);
-        }
         
     }
 
