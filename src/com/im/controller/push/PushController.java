@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -39,7 +41,7 @@ public class PushController {
 	private String key;
 	private String operate;
 	private Timer timer;
-    private static Map<String,Timer> timerMap = new HashMap<String, Timer>();
+    private static ConcurrentMap<String,Timer> timerMap = new ConcurrentHashMap<String, Timer>();
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@RequestMapping("/PushServer")
 	@ResponseBody

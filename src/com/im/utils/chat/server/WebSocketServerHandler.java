@@ -223,9 +223,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 					replayContent = "{\"T\":\"6\",\"R\":\"0\"}";// 被踢下线
 					ChannelHandlerContext tempCtx = NettyChannelMap.get(map
 							.get("UI"));
-					tempCtx.writeAndFlush(new TextWebSocketFrame(replayContent));
-					tempCtx.close();
-					NettyChannelMap.remove(NettyChannelMap.get(map.get("UI")));
+					SendUtils.pushMessage(tempCtx,new TextWebSocketFrame(replayContent));
 					//
 					if (ServerManager.cacheType.equals("redis")) {
 						RedisUtil.delOject(map.get("UI"));
@@ -280,13 +278,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 					 * sendExceptMessage(channelHandlerContext,
 					 * "4",userid,username); }
 					 */
-					channelHandlerContext.writeAndFlush(new TextWebSocketFrame(
-							replayContent));
+					SendUtils.pushMessage(channelHandlerContext,new TextWebSocketFrame(replayContent));
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					replayContent = "{\"T\":\"1\",\"R\":\"1\"}";// 登录失败
-					channelHandlerContext.writeAndFlush(new TextWebSocketFrame(
-							replayContent));
+					SendUtils.pushMessage(channelHandlerContext,new TextWebSocketFrame(replayContent));
 					e.printStackTrace();
 				}
 				if (ServerManager.cacheType.equals("redis")) {
@@ -345,8 +341,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 					 */
 
 					NettyChannelMap.remove(channelHandlerContext);
-					channelHandlerContext.writeAndFlush(new TextWebSocketFrame(
-							replayContent));
+					SendUtils.pushMessage(channelHandlerContext,new TextWebSocketFrame(replayContent));
 					channelHandlerContext.close();
 
 					if (ServerManager.cacheType.equals("redis")) {
@@ -355,9 +350,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					replayContent = "{\"T\":\"2\",\"R\":\"1\"}";// 退出失败
-					channelHandlerContext.writeAndFlush(new TextWebSocketFrame(
-							replayContent));
-					channelHandlerContext.close();
+					SendUtils.pushMessage(channelHandlerContext,new TextWebSocketFrame(replayContent));
 					e.printStackTrace();
 				}
 				logger.info("用户退出，ID:" + map.get("UI") + "；用户名："
@@ -380,8 +373,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 					}
 				}
 			} else if (map.get("T").equals("0")) {
-				channelHandlerContext.writeAndFlush(new TextWebSocketFrame(
-						"{\"T\":\"0\"}"));
+				SendUtils.pushMessage(channelHandlerContext,new TextWebSocketFrame("{\"T\":\"0\"}"));
 			}
 
 		} catch (Exception e) {

@@ -59,10 +59,10 @@ public class MessageUtil {
 				String messageId = saveOnlineMessage(map);
 				map.put("MI", messageId);
 				if(type.equals("socket")){
-					chc.channel().writeAndFlush(mapper.writeValueAsString(map));
+					SendUtils.pushMessage(chc,mapper.writeValueAsString(map));
 				}
 				else if(type.equals("websocket")){
-					chc.channel().writeAndFlush(new TextWebSocketFrame(mapper.writeValueAsString(map)));
+					SendUtils.pushMessage(chc,new TextWebSocketFrame(mapper.writeValueAsString(map)));
 				}
 			} else {
 			 
@@ -201,10 +201,10 @@ public class MessageUtil {
 				json = mapper.writeValueAsString(paramMap);
 				String content = json;
 				if(type.equals("socket")){
-					ctx.channel().writeAndFlush(content);
+					SendUtils.pushMessage(ctx,content);
 				}
 				else if(type.equals("websocket")){
-					ctx.channel().writeAndFlush(new TextWebSocketFrame(content));
+					SendUtils.pushMessage(ctx,new TextWebSocketFrame(content));
 				}
 				
 
@@ -370,10 +370,10 @@ public class MessageUtil {
 					 * temp.writeAndFlush(buf);
 					 */ 
 					if(type.equals("socket")){
-						temp.channel().writeAndFlush(content);
+						SendUtils.pushMessage(temp,content);
 					}
 					else if(type.equals("websocket")){
-						temp.channel().writeAndFlush(new TextWebSocketFrame(content));
+						SendUtils.pushMessage(temp,new TextWebSocketFrame(content));
 					}
 				} catch (Exception e) {
 					// TODO: handle exception

@@ -88,9 +88,7 @@ public class SocketServerHandler extends CustomHeartbeatHandler {
 					replayContent = "{\"T\":\"6\",\"R\":\"0\"}";// 被踢下线
 					ChannelHandlerContext tempCtx = NettyChannelMap.get(map
 							.get("UI"));
-					tempCtx.writeAndFlush(replayContent);
-					tempCtx.close();
-					NettyChannelMap.remove(NettyChannelMap.get(map.get("UI")));
+					SendUtils.pushMessage(tempCtx, replayContent);
 					if (ServerManager.cacheType.equals("redis")) {
 						RedisUtil.delOject(map.get("UI"));
 					} else if (ServerManager.cacheType.equals("database")) {
@@ -139,11 +137,11 @@ public class SocketServerHandler extends CustomHeartbeatHandler {
 					 * sendExceptMessage(channelHandlerContext,
 					 * "4",userid,username); }
 					 */
-					channelHandlerContext.writeAndFlush(replayContent);
+					SendUtils.pushMessage(channelHandlerContext, replayContent);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					replayContent = "{\"T\":\"1\",\"R\":\"1\"}";// 登录失败
-					channelHandlerContext.writeAndFlush(replayContent);
+					SendUtils.pushMessage(channelHandlerContext, replayContent);
 					e.printStackTrace();
 				}
 
@@ -201,10 +199,7 @@ public class SocketServerHandler extends CustomHeartbeatHandler {
 					 * MessageUtil.sendExceptMessage(channelHandlerContext,
 					 * "5",userid,username); }
 					 */
-
-					NettyChannelMap.remove(channelHandlerContext);
-					channelHandlerContext.writeAndFlush(replayContent);
-					channelHandlerContext.close();
+					SendUtils.pushMessage(channelHandlerContext, replayContent);
 
 					if (ServerManager.cacheType.equals("redis")) {
 						RedisUtil.delOject(map.get("UI"));
@@ -213,8 +208,7 @@ public class SocketServerHandler extends CustomHeartbeatHandler {
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					replayContent = "{\"T\":\"2\",\"R\":\"1\"}";// 退出失败
-					channelHandlerContext.writeAndFlush(replayContent);
-					channelHandlerContext.close();
+					SendUtils.pushMessage(channelHandlerContext, replayContent);
 					e.printStackTrace();
 				}
 				logger.info("用户退出，ID:" + map.get("UI") + "；用户名："
@@ -238,7 +232,7 @@ public class SocketServerHandler extends CustomHeartbeatHandler {
 				}
 			}
 			else if(map.get("T").equals("0")){
-				channelHandlerContext.writeAndFlush("{\"T\":\"0\"}");
+				SendUtils.pushMessage(channelHandlerContext,"{\"T\":\"0\"}");
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
