@@ -1,5 +1,7 @@
 package com.im.utils.chat.server;
 
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
@@ -76,9 +78,7 @@ public class SocketServerHandler extends CustomHeartbeatHandler {
 			String content = msg.toString();
 			ObjectMapper mapper = new ObjectMapper();
 			Map<String, String> map = new HashMap<String, String>();
-			map = mapper.readValue(content,
-					new TypeReference<Map<String, String>>() {
-					});
+			map = mapper.readValue(content,new TypeReference<Map<String, String>>() {});
 
 			if (map.get("T").equals("1")) {// login
 				// 登录
@@ -274,53 +274,34 @@ public class SocketServerHandler extends CustomHeartbeatHandler {
 		NettyChannelMap.remove(ctx);
 
 		ctx.close();
-	}
-	@SuppressWarnings("rawtypes")
+	} 
 	@Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 		super.channelInactive(ctx);
-		String userid=NettyChannelMap.getkey(ctx);
-        for (Map.Entry entry:NettyChannelMap.map.entrySet()){
-            if (entry.getValue()==ctx){
-            	//database
-                Chatuser chatuser= new Chatuser(); 
-                chatuser.setUserid(entry.getKey().toString());
-                chatuser.setIsonline("1");
-                //chatuser.setDetail("");
-                //chatuser.setFlag("0");
-                ssh.iChatuserService.updateChatuser(chatuser);
-                
-                Chatfriend chatfriend = new Chatfriend();
-                chatfriend.setFriendid(entry.getKey().toString());
-                chatfriend.setIsonline("1");
-                ssh.iChatfriendService.updateChatfriend(chatfriend);
+		final String userid=NettyChannelMap.getkey(ctx);
+		if(userid!=null){
+			 Chatuser chatuser= new Chatuser(); 
+            chatuser.setUserid(userid);
+            chatuser.setIsonline("1");
+            chatuser.setDetail("");
+            //chatuser.setFlag("0");
+            ssh.iChatuserService.updateChatuser(chatuser);
+            
+            Chatfriend chatfriend = new Chatfriend();
+            chatfriend.setFriendid(userid);
+            chatfriend.setIsonline("1");
+            ssh.iChatfriendService.updateChatfriend(chatfriend);
+            
+            //移除
+            NettyChannelMap.map.remove(userid);
+		}
+		ChannelFuture future = ctx.channel().close();
+        future.addListener(new ChannelFutureListener() {
+            public void operationComplete(ChannelFuture future) {
+                System.out.println(userid+"--退出成功！");
             }
-            /*else{//通知其他用户自己下线
-            	Chatuser chatuser= new Chatuser(); 
-                chatuser=iChatuserService.selectchatuserById(userid);
-                if(chatuser!=null){
-                	ChannelHandlerContext temp = (ChannelHandlerContext) entry.getValue();
-                	Map<String,String> paramMap=new HashMap<String,String>();
-            		paramMap.put("T", "5");
-            		paramMap.put("FI", userid);
-            		paramMap.put("FN", chatuser.getUsername());
-            		ObjectMapper mapper = new ObjectMapper();
-        			String json = "";
-        			json = mapper.writeValueAsString(paramMap);
-                    String content = json;
-                    ByteBuf buf = temp.alloc().buffer(5 + content.getBytes().length);
-                    buf.writeInt(5 + content.getBytes().length);
-                    buf.writeByte(CustomHeartbeatHandler.CUSTOM_MSG);
-                    buf.writeBytes(content.getBytes());
-                    temp.writeAndFlush(buf);
-                    temp.writeAndFlush(content);
-                	 
-                }
-            	
-            }*/
-        }
-        //移除
-        NettyChannelMap.remove(ctx);
+        });
+        
         if(ServerManager.cacheType.equals("redis")){
         	RedisUtil.delOject(userid);
         }
@@ -345,6 +326,7 @@ public class SocketServerHandler extends CustomHeartbeatHandler {
 		RedisUtil.setObject(id, socketIp + ":" + socketPort);
 
 	}
-	// {"T":"1","UI":"101","UN":"用户名","UH":""}
-	// {"T":"3","CT":"dQ==\n","UI":"100","UN":"用户名999","FI":"3294","TP":"0","HI":""}
+	//{"T":"0"}
+	// {"T":"1","UI":"100","UN":"用户名1","UH":""}&end== {"T":"1","UI":"101","UN":"用户名1","UH":""}&end==   http://b-ssl.duitang.com/uploads/item/201603/07/20160307224215_stmZu.jpeg
+	// {"T":"3","CT":"6YCU5b6E5ZWm","UI":"100","UN":"用户名999","FI":"101","TP":"0","UH":"http://b-ssl.duitang.com/uploads/item/201603/07/20160307224215_stmZu.jpeg"}&end==
 }

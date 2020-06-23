@@ -4,6 +4,8 @@ package com.im.utils.chat.server;
 
 import java.nio.charset.Charset;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -26,7 +28,12 @@ public class SocketServerInitializer extends
     public void initChannel(SocketChannel ch) throws Exception {
 		Logger logger = Logger.getLogger("NettyChatLogger");
 		 ChannelPipeline pipeline = ch.pipeline(); 
-        pipeline.addLast("framer", new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
+		 
+		 //ByteBuf delimiter = Unpooled.copiedBuffer("&end==".getBytes());
+		 //pipeline.addLast("framer", new DelimiterBasedFrameDecoder(8192, delimiter));
+         
+ 
+		pipeline.addLast("framer", new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));// 这里设置：不删除分隔符，
         pipeline.addLast("decoder", new StringDecoder(Charset.forName("GBK")));
         pipeline.addLast("encoder", new StringEncoder(Charset.forName("GBK")));
         pipeline.addLast("handler", new SocketServerHandler());

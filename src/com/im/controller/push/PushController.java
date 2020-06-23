@@ -180,7 +180,7 @@ public class PushController {
 						paramMap.put("CT", content);
 						paramMap.put("TP", type);
 						paramMap.put("PT", flag);
-						paramMap.put("HI", headimage);
+						paramMap.put("UH", headimage);
 						new MessageUtil().sendOnlineMessage(channelHandlerContext,paramMap,nettype);
 					}
 				}
