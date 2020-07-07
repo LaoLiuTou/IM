@@ -1,5 +1,7 @@
 package com.im.utils.chat.common;
 
+import java.util.Date;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleStateEvent;
@@ -29,26 +31,29 @@ public abstract class CustomHeartbeatHandler extends SimpleChannelInboundHandler
     	 
     }
     @Override
-    protected void channelRead0(ChannelHandlerContext context, Object string) throws Exception {
-    	if (string.toString().trim().equals(PING_MSG)) {
-            sendPongMsg(context);
-        } else if (string.equals(PONG_MSG)){
+    protected void channelRead0(ChannelHandlerContext ctx, Object message) throws Exception {
+    	//这里先不判断websocket了
+       	if (message.toString().trim().equals(PING_MSG)) {
+            sendPongMsg(ctx);
+           //记录时间
+           NettyChannelMap.timemap.put(NettyChannelMap.getkey(ctx), new Date().getTime());
+        } else if (message.equals(PONG_MSG)){
+        	//do  noting 
         }
         else {
-            handleData(context, string);
-        }
-    	//shandleData(context, string);
+            handleData(ctx, message);
+        } 
     }
 
-    protected void sendPingMsg(ChannelHandlerContext context) {
-        context.writeAndFlush(PING_MSG);
+    protected void sendPingMsg(ChannelHandlerContext ctx) {
+        ctx.writeAndFlush(PING_MSG);
     }
 
-	private void sendPongMsg(ChannelHandlerContext context) {
-        context.channel().writeAndFlush(PONG_MSG);
+	private void sendPongMsg(ChannelHandlerContext ctx) {
+        ctx.channel().writeAndFlush(PONG_MSG);
     }
 
-    protected abstract void handleData(ChannelHandlerContext channelHandlerContext, Object content);
+    protected abstract void handleData(ChannelHandlerContext ctx, Object message);
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {

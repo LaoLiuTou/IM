@@ -67,7 +67,7 @@ public class SocketServerHandler extends CustomHeartbeatHandler {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	protected void handleData(ChannelHandlerContext channelHandlerContext,
+	protected void handleData(ChannelHandlerContext ctx,
 			Object msg) {
 		try {
 			/*
@@ -78,8 +78,7 @@ public class SocketServerHandler extends CustomHeartbeatHandler {
 			String content = msg.toString();
 			ObjectMapper mapper = new ObjectMapper();
 			Map<String, String> map = new HashMap<String, String>();
-			map = mapper.readValue(content,new TypeReference<Map<String, String>>() {});
-
+			map = mapper.readValue(content,new TypeReference<Map<String, String>>() {}); 
 			if (map.get("T").equals("1")) {// login
 				// 登录
 				String replayContent = "";
@@ -100,7 +99,7 @@ public class SocketServerHandler extends CustomHeartbeatHandler {
 				}
 				// database run
 				try {
-					NettyChannelMap.add(map.get("UI"), channelHandlerContext);
+					NettyChannelMap.add(map.get("UI"), ctx);
 					replayContent = "{\"T\":\"1\",\"R\":\"0\"}";// 登录成功
 					Chatuser chatuser = new Chatuser();
 					chatuser.setUserid(map.get("UI"));
@@ -127,21 +126,21 @@ public class SocketServerHandler extends CustomHeartbeatHandler {
 					ssh.iChatfriendService.updateChatfriend(chatfriend);
 
 					// 发送离线消息
-					new MessageUtil().sendOfflineMessage(channelHandlerContext,
+					new MessageUtil().sendOfflineMessage(ctx,
 							map.get("UI"),"socket");
 
 					// 通知上线
 					/*
 					 * String userid=map.get("UI"); String
 					 * username=map.get("UN"); if(userid.length()>0){
-					 * sendExceptMessage(channelHandlerContext,
+					 * sendExceptMessage(ctx,
 					 * "4",userid,username); }
 					 */
-					SendUtils.pushMessage(channelHandlerContext, replayContent);
+					SendUtils.pushMessage(ctx, replayContent);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					replayContent = "{\"T\":\"1\",\"R\":\"1\"}";// 登录失败
-					SendUtils.pushMessage(channelHandlerContext, replayContent);
+					SendUtils.pushMessage(ctx, replayContent);
 					e.printStackTrace();
 				}
 
@@ -193,13 +192,13 @@ public class SocketServerHandler extends CustomHeartbeatHandler {
 
 					/*
 					 * String
-					 * userid=NettyChannelMap.getkey(channelHandlerContext);
+					 * userid=NettyChannelMap.getkey(ctx);
 					 * String username=map.get("UN"); if(userid.length()>0){
 					 * //通知下线 
-					 * MessageUtil.sendExceptMessage(channelHandlerContext,
+					 * MessageUtil.sendExceptMessage(ctx,
 					 * "5",userid,username); }
 					 */
-					SendUtils.pushMessage(channelHandlerContext, replayContent);
+					SendUtils.pushMessage(ctx, replayContent);
 
 					if (ServerManager.cacheType.equals("redis")) {
 						RedisUtil.delOject(map.get("UI"));
@@ -208,7 +207,7 @@ public class SocketServerHandler extends CustomHeartbeatHandler {
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					replayContent = "{\"T\":\"2\",\"R\":\"1\"}";// 退出失败
-					SendUtils.pushMessage(channelHandlerContext, replayContent);
+					SendUtils.pushMessage(ctx, replayContent);
 					e.printStackTrace();
 				}
 				logger.info("用户退出，ID:" + map.get("UI") + "；用户名："
@@ -232,7 +231,7 @@ public class SocketServerHandler extends CustomHeartbeatHandler {
 				}
 			}
 			else if(map.get("T").equals("0")){
-				SendUtils.pushMessage(channelHandlerContext,"{\"T\":\"0\"}");
+				SendUtils.pushMessage(ctx,"{\"T\":\"0\"}");
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

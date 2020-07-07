@@ -54,6 +54,7 @@ import com.im.utils.chat.ApnsTools;
 import com.im.utils.chat.RedisUtil;
 import com.im.utils.chat.ServerManager;
 import com.im.utils.chat.client.SocketClient;
+import com.im.utils.chat.common.CustomHeartbeatHandler;
 import com.im.utils.chat.common.NettyChannelMap;
 
 /**
@@ -62,7 +63,7 @@ import com.im.utils.chat.common.NettyChannelMap;
  * @date 2014年2月14日
  */
 @Component
-public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
+public class WebSocketServerHandler extends CustomHeartbeatHandler {
 	Logger logger = Logger.getLogger("IMLogger");
 
 	private WebSocketServerHandshaker handshaker;
@@ -78,15 +79,15 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 	private IChataddressService iChataddressService;
 
 	public WebSocketServerHandler() {
+		super("server");
 	}
-
 	// 3.容器初始化的时候进行执行-这里是重点
 	@PostConstruct
 	public void init() {
 		wssh = this;
 	}
 
-	@Override
+	/*@Override
 	public void channelRead0(ChannelHandlerContext ctx, Object msg)
 			throws Exception {
 		// 传统的HTTP接入
@@ -97,8 +98,25 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 		else if (msg instanceof WebSocketFrame) {
 			handleWebSocketFrame(ctx, (WebSocketFrame) msg);
 		}
+	}*/
+	@Override
+	protected void handleData(ChannelHandlerContext ctx, Object msg) {
+		  
+		// 传统的HTTP接入
+		if (msg instanceof FullHttpRequest) {
+			try {
+				handleHttpRequest(ctx, (FullHttpRequest) msg);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		// WebSocket接入
+		else if (msg instanceof WebSocketFrame) {
+			handleWebSocketFrame(ctx, (WebSocketFrame) msg);
+		}
+		
 	}
-
 	@Override
 	public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
 		ctx.flush();
@@ -143,14 +161,14 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
 	@SuppressWarnings({ "rawtypes", "unchecked"  })
 	private void handleWebSocketFrame(
-			ChannelHandlerContext channelHandlerContext, WebSocketFrame frame) {
+			ChannelHandlerContext ctx, WebSocketFrame frame) {
 
 		// 判断是否是关闭链路的指令
 		if (frame instanceof CloseWebSocketFrame) {
-			handshaker.close(channelHandlerContext.channel(),
+			handshaker.close(ctx.channel(),
 					(CloseWebSocketFrame) frame.retain());
 
-			String userid = NettyChannelMap.getkey(channelHandlerContext);
+			String userid = NettyChannelMap.getkey(ctx);
 			if (userid.length() > 0) {
 				// database
 				Chatuser chatuser = new Chatuser();
@@ -176,13 +194,13 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 			}
 
 			// 移除
-			NettyChannelMap.remove(channelHandlerContext);
-			channelHandlerContext.close();
+			NettyChannelMap.remove(ctx);
+			ctx.close();
 			return;
 		}
 		// 判断是否是Ping消息
 		if (frame instanceof PingWebSocketFrame) {
-			channelHandlerContext.channel().write(
+			ctx.channel().write(
 					new PongWebSocketFrame(frame.content().retain()));
 			return;
 		}
@@ -195,8 +213,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 		// 返回应答消息
 		String request = ((TextWebSocketFrame) frame).text();
 		// logger.info(String.format("%s received %s",
-		// channelHandlerContext.channel(), request));
-		// channelHandlerContext.writeAndFlush(new
+		// ctx.channel(), request));
+		// ctx.writeAndFlush(new
 		// TextWebSocketFrame("欢迎使用Netty WebSocket服务，现在时刻："
 		// + new java.util.Date().toString()));
 		// new TextWebSocketFrame("欢迎使用Netty WebSocket服务，现在时刻："
@@ -238,7 +256,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
 				// database run
 				try {
-					NettyChannelMap.add(map.get("UI"), channelHandlerContext);
+					NettyChannelMap.add(map.get("UI"), ctx);
 					replayContent = "{\"T\":\"1\",\"R\":\"0\"}";// 登录成功
 					Chatuser chatuser = new Chatuser();
 					chatuser.setUserid(map.get("UI"));
@@ -268,21 +286,21 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 					wssh.iChatfriendService.updateChatfriend(chatfriend);
 
 					// 发送离线消息
-					new MessageUtil().sendOfflineMessage(channelHandlerContext,
+					new MessageUtil().sendOfflineMessage(ctx,
 							map.get("UI"), "websocket");
 
 					// 通知上线
 					/*
 					 * String userid=map.get("UI"); String
 					 * username=map.get("UN"); if(userid.length()>0){
-					 * sendExceptMessage(channelHandlerContext,
+					 * sendExceptMessage(ctx,
 					 * "4",userid,username); }
 					 */
-					SendUtils.pushMessage(channelHandlerContext,new TextWebSocketFrame(replayContent));
+					SendUtils.pushMessage(ctx,new TextWebSocketFrame(replayContent));
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					replayContent = "{\"T\":\"1\",\"R\":\"1\"}";// 登录失败
-					SendUtils.pushMessage(channelHandlerContext,new TextWebSocketFrame(replayContent));
+					SendUtils.pushMessage(ctx,new TextWebSocketFrame(replayContent));
 					e.printStackTrace();
 				}
 				if (ServerManager.cacheType.equals("redis")) {
@@ -334,15 +352,15 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
 					/*
 					 * String
-					 * userid=NettyChannelMap.getkey(channelHandlerContext);
+					 * userid=NettyChannelMap.getkey(ctx);
 					 * String username=map.get("UN"); if(userid.length()>0){
-					 * //通知下线 sendExceptMessage(channelHandlerContext,
+					 * //通知下线 sendExceptMessage(ctx,
 					 * "5",userid,username); }
 					 */
 
-					NettyChannelMap.remove(channelHandlerContext);
-					SendUtils.pushMessage(channelHandlerContext,new TextWebSocketFrame(replayContent));
-					channelHandlerContext.close();
+					NettyChannelMap.remove(ctx);
+					SendUtils.pushMessage(ctx,new TextWebSocketFrame(replayContent));
+					ctx.close();
 
 					if (ServerManager.cacheType.equals("redis")) {
 						RedisUtil.delOject(map.get("UI"));
@@ -350,7 +368,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					replayContent = "{\"T\":\"2\",\"R\":\"1\"}";// 退出失败
-					SendUtils.pushMessage(channelHandlerContext,new TextWebSocketFrame(replayContent));
+					SendUtils.pushMessage(ctx,new TextWebSocketFrame(replayContent));
 					e.printStackTrace();
 				}
 				logger.info("用户退出，ID:" + map.get("UI") + "；用户名："
@@ -373,7 +391,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 					}
 				}
 			} else if (map.get("T").equals("0")) {
-				SendUtils.pushMessage(channelHandlerContext,new TextWebSocketFrame("{\"T\":\"0\"}"));
+				SendUtils.pushMessage(ctx,new TextWebSocketFrame("{\"T\":\"0\"}"));
+				//记录时间
+		        NettyChannelMap.timemap.put(NettyChannelMap.getkey(ctx), new Date().getTime());
 			}
 
 		} catch (Exception e) {
@@ -422,4 +442,5 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 		RedisUtil.setObject(id, socketIp + ":" + socketPort);
 
 	}
+	
 }
